@@ -73,7 +73,9 @@ ui <- page_sidebar(
       )
       
     ),
-    nav_panel("Explore", plotlyOutput("scatter_plot")),
+    nav_panel("Explore", 
+              plotlyOutput("scatter_plot"),
+              mod_download_plot_ui("dl_scatter", label = "Download")),
     nav_panel(
       "Data", 
       DT::dataTableOutput("data_table")
@@ -128,22 +130,23 @@ server <- function(input, output, session) {
   })
   
   
-  output$scatter_plot <- renderPlotly({
-    df <- filtered_data()
-    req(nrow(df) >= 1)
-    if(nrow(df) > 1000) {
-      df <- df[sample(nrow(df), 1000), ]
-    }
-    p <- ggplot(df, aes(x = AGE, y = LOS, color = SEX)) +
-      geom_point(alpha = 0.3) +
+  # Create the scatter plot as a reactive (reusable)
+  scatter_plot_obj <- reactive({
+    req(nrow(filtered_data()) >= 1)
+    ggplot(filtered_data(), aes(x = AGE, y = LOS, color = SEX)) +
+      geom_point(alpha = 0.3) + geom_smooth(method = "loess", se = T) +
       labs(x = "Age", y = "Length of Stay (days)", color = "Sex") +
-      geom_smooth(method = "lm", se = FALSE) +
       theme_minimal()
-    ggplotly(p)
   })
   
-  mod_download_plot_server("dl_age", filename = "age_distribution", figure = age_plot)
+  # Display as interactive plotly
+  output$scatter_plot <- renderPlotly({
+    ggplotly(scatter_plot_obj())
+  })
   
+  
+  mod_download_plot_server("dl_age", filename = "age_distribution", figure = age_plot)
+  mod_download_plot_server("dl_scatter", filename = "scatter_age_los", figure = scatter_plot_obj)
   observeEvent(input$reset, {
     updateSelectInput(session, "outcome", selected = "All")
     updateSelectInput(session, "diagnosis", selected = "All")
