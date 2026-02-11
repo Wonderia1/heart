@@ -6,7 +6,7 @@ library(ggplot2)
 library(shinythemes)
 #install.packages("shinylive")
 library(shinylive)
-source("R/helpers.R")
+source("R/mod_download_plot.R")
 
 heart <- readRDS("data/heart.rds")
 
@@ -68,7 +68,8 @@ ui <- page_sidebar(
       ),
       card(
         card_header("Age Distribution"),
-        plotOutput("age_hist")
+        plotOutput("age_hist"),
+        mod_download_plot_ui("dl_age",label = "Download")
       )
       
     ),
@@ -107,7 +108,8 @@ server <- function(input, output, session) {
   })
   
   
-  output$age_hist <- renderPlot({
+  # Create the age plot as a reactive (reusable)
+  age_plot <- reactive({
     req(nrow(filtered_data()) >= 2)
     ggplot(filtered_data(), aes(x = AGE, fill = DIED)) +
       geom_density(alpha = 0.5) +
@@ -119,6 +121,12 @@ server <- function(input, output, session) {
         axis.text = element_text(size = 14)
       )
   })
+  
+  # Display the plot
+  output$age_hist <- renderPlot({
+    age_plot()
+  })
+  
   
   output$scatter_plot <- renderPlotly({
     df <- filtered_data()
