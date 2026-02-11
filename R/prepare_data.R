@@ -1,4 +1,4 @@
-install.packages(c("DT", "ggplot2", "plotly", "bsicons")) #bsicons = icone for shinyApp
+#install.packages(c("DT", "ggplot2", "plotly", "bsicons")) #bsicons = icone for shinyApp
 
 # Prepare heart attack data for Shiny app
 heart <- read.delim("data/heartatk4R.txt")
