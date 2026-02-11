@@ -3,6 +3,9 @@ library(bslib)
 library(DT)
 library(plotly)
 library(ggplot2)
+
+source("R/helpers.R")
+
 heart <- readRDS("data/heart.rds")
 
 ui <- page_sidebar(
@@ -93,15 +96,14 @@ server <- function(input, output, session) {
   })
   # Female stats
   output$f_mortality <- renderText({
-    d <- filtered_data()[filtered_data()$SEX == "Female", ]
-    paste0(round(100 * sum(d$DIED == "Died") / nrow(d), 1), "%")
+    compute_mortality(filtered_data()[filtered_data()$SEX == "Female", ])
   })
   
   # Male stats
   output$m_mortality <- renderText({
-    d <- filtered_data()[filtered_data()$SEX == "Male", ]
-    paste0(round(100 * sum(d$DIED == "Died") / nrow(d), 1), "%")
+    compute_mortality(filtered_data()[filtered_data()$SEX == "Male", ])
   })
+  
   
   output$age_hist <- renderPlot({
     req(nrow(filtered_data()) >= 2)
