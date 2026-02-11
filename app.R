@@ -142,6 +142,8 @@ server <- function(input, output, session) {
     ggplotly(p)
   })
   
+  mod_download_plot_server("dl_age", filename = "age_distribution", figure = age_plot)
+  
   observeEvent(input$reset, {
     updateSelectInput(session, "outcome", selected = "All")
     updateSelectInput(session, "diagnosis", selected = "All")
